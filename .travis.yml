@@ -15,7 +15,7 @@ sudo: false
 #  - cd dist
 
 script:
-#  - npm run test
+  - npm run test
 
 after_script:
 #  - npm run build # make a dist folder
@@ -29,4 +29,5 @@ deploy:
     on:
       tags: true
       node: '10'
+
     skip_cleanup: true

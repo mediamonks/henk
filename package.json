@@ -8,13 +8,17 @@
   },
   "author": "Mient-jan Stelling",
   "homepage": "https://github.com/mediamonks/henk#readme",
+  "license": "MIT",
   "bin": {
     "uploader": "cli/henk.js"
   },
   "publishConfig": {
     "access": "public"
   },
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mediamonks/henk.git"
+  },
   "dependencies": {
     "chai": "^4.2.0",
     "commander": "^2.19.0",
