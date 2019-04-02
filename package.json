@@ -1,6 +1,6 @@
 {
   "name": "@mediamonks/henk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Uploading files from one location to the other.",
   "main": "./index.js",
   "scripts": {
