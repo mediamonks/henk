@@ -1,6 +1,7 @@
 # Henk [![Travis](https://img.shields.io/travis/mediamonks/henk.svg)](https://travis-ci.org/mediamonks/richmedia-temple-server) [![npm](https://img.shields.io/npm/v/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server) [![npm](https://img.shields.io/npm/dm/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server)
 
-Richmedia Temple Server is used as a tool to build and develop richmedia units.
+Uploading files to a location.
+
 See documentation https://assets-at-scale.gitbook.io/temple-suite/
 
 
