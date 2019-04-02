@@ -6,9 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Mient-jan Stelling",
+  "homepage": "https://github.com/mediamonks/henk#readme",
   "bin": {
     "uploader": "cli/henk.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "dependencies": {
