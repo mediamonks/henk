@@ -4,9 +4,40 @@ const targets = require('./target');
 const conditionalPrompt = require('./util/conditionalPrompt');
 const validateRelativeUrls = require('./util/validate/validateRelativeUrls');
 const fs = require('fs-extra');
+const inquirer = require('inquirer');
 
 module.exports = async (data = {}) => {
   // checking for a .henkrc
+  const hasGitIgnore = await fs.pathExists('./.gitignore');
+
+  // checking if .gitignore is exists
+  if ((await fs.pathExists('./.git')) && !hasGitIgnore) {
+    const { shouldCreateGitIgnore } = await inquirer.prompt({
+      type: 'confirm',
+      name: 'shouldCreateGitIgnore',
+      message: 'No .gitignore found should i create it?',
+    });
+
+    if (shouldCreateGitIgnore) {
+      fs.outputFile('./.gitignore', '.henkrc');
+    }
+  }
+
+  const gitIgnoreContent = await fs.readFile('./.gitignore', 'utf8');
+
+  const regEx = /\.henkrc/gm;
+
+  if (!regEx.test(gitIgnoreContent)) {
+    const { shouldAddIt } = await inquirer.prompt({
+      type: 'confirm',
+      name: 'shouldAddIt',
+      message: 'No .henkrc was added to the .gitignore, should i add it?',
+    });
+
+    if (shouldAddIt) {
+      fs.outputFile('./.gitignore', gitIgnoreContent.replace(/\n$/, '') + '\n.henkrc');
+    }
+  }
 
   if (await fs.pathExists('./.henkrc')) {
     data = {
