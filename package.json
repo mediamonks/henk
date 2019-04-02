@@ -4,7 +4,7 @@
   "description": "Uploading files from one location to the other.",
   "main": "./index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "Mient-jan Stelling",
   "homepage": "https://github.com/mediamonks/henk#readme",
@@ -16,9 +16,11 @@
   },
   "license": "MIT",
   "dependencies": {
+    "chai": "^4.2.0",
     "commander": "^2.19.0",
     "fs-extra": "^7.0.1",
     "inquirer": "^6.2.2",
+    "mocha": "^6.0.2",
     "opener": "^1.5.1",
     "s3-batch-upload": "^1.1.1",
     "uuidv4": "^3.0.1"
