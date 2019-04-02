@@ -10,7 +10,7 @@
   "homepage": "https://github.com/mediamonks/henk#readme",
   "license": "MIT",
   "bin": {
-    "uploader": "cli/henk.js"
+    "henk": "cli/henk.js"
   },
   "publishConfig": {
     "access": "public"
@@ -27,6 +27,7 @@
     "mocha": "^6.0.2",
     "opener": "^1.5.1",
     "s3-batch-upload": "^1.1.1",
+    "uuid": "^3.3.2",
     "uuidv4": "^3.0.1"
   }
 }

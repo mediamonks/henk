@@ -5,6 +5,7 @@
  * @return {Promise<void>}
  */
 module.exports = async function validateActionInput(input, questions) {
+
   questions = questions.filter(question => question.required);
 
   for (let i = 0; i < questions.length; i++) {
@@ -17,15 +18,27 @@ module.exports = async function validateActionInput(input, questions) {
 
     if (question.type) {
       switch (question.type) {
-        case "number": {
-          if (typeof value !== "number") {
+        case 'number': {
+          if (typeof value !== 'number') {
             throwErrorNotCorrectType(question);
           }
           break;
         }
-        case "confirm": {
-          if (typeof value !== "boolean") {
+
+        case 'confirm': {
+          if (typeof value !== 'boolean') {
             throwErrorNotCorrectType(question);
+          }
+
+          break;
+        }
+        case 'input': {
+          if (typeof value !== 'string') {
+            throwErrorNotCorrectType(question);
+          }
+
+          if (value.trim() === '') {
+            throwError(question);
           }
 
           break;

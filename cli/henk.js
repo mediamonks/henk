@@ -8,4 +8,6 @@ program
 	.version(package.version)
 	.parse(process.argv);
 
-henk(program);
+// program
+
+henk({});

@@ -1,4 +1,6 @@
 module.exports = {
 	s3: require("./s3.js"),
-	// sftp: require("./ftp.js")
+	'mm-preview': require("./mm-preview.js"),
+	'doubleclick': require("./doubleclick.js"),
+	'monet': require("./monet.js")
 };
