@@ -40,10 +40,15 @@ module.exports = async (data = {}) => {
   }
 
   if (await fs.pathExists('./.henkrc')) {
-    data = {
-      ...(await fs.readJson('./.henkrc')),
-      ...data,
-    };
+    const henkrc = await fs.readJson('./.henkrc');
+
+    // if type of provided argument is not the same ignore henkrc file.
+    if (!data.type || henkrc.type === data.type) {
+      data = {
+        ...henkrc,
+        ...data,
+      };
+    }
   }
 
   data = await conditionalPrompt(data, [
@@ -78,17 +83,7 @@ module.exports = async (data = {}) => {
 
   data = await conditionalPrompt(data, target.questions);
 
+  await fs.writeJson('./.henkrc', data);
+
   target.action(data);
-
-  const validKeys = [...target.questions.map(val => val.name), 'inputDir', 'type'];
-
-  fs.writeJson(
-    './.henkrc',
-    Object.keys(data).reduce((prev, name) => {
-      if (validKeys.some(val => val === name)) {
-        prev[name] = data[name];
-      }
-      return prev;
-    }, {}),
-  );
 };

@@ -1,30 +1,20 @@
 const validateActionInput = require('../util/validateActionInput');
 const validateRelativeUrls = require('../util/validate/validateRelativeUrls');
-const s3 = require('./s3');
 const uuid = require('uuid/v4');
 const opener = require('opener');
 const Uploader = require('s3-batch-upload').default;
+const fs = require('fs-extra');
+
+const s3 = require('./s3');
 
 const preview = {
-  questions: s3.questions.filter(question => question.name !== 'outputDir'),
+  questions: [...s3.questions.filter(question => question.name !== 'outputDir')],
   async action(data) {
     if (!data.outputDir) {
       data.outputDir = `${uuid()}/`;
     }
 
-    const questions = this.questions.map(question => {
-      if (question.name === 'outputDir') {
-        return {
-          type: 'confirm',
-          name: 'outputDir',
-          description: 'Please fill in the target directory',
-          errorMessage: 'Missing target ',
-          required: true,
-        };
-      }
-
-      return question;
-    });
+    await fs.writeJson('./.henkrc', data);
 
     validateActionInput(data, this.questions);
 
