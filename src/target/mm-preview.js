@@ -1,5 +1,6 @@
 const validateActionInput = require('../util/validateActionInput');
-const validateRelativeUrls = require('../util/validate/validateRelativeUrls');
+const validateNotOutsideWorkingDir = require('../util/validate/validateNotOutsideWorkingDir');
+const validateNotEmpty = require('../util/validate/validateNotEmpty');
 const uuid = require('uuid/v4');
 const opener = require('opener');
 const Uploader = require('s3-batch-upload').default;
@@ -8,7 +9,45 @@ const fs = require('fs-extra');
 const s3 = require('./s3');
 
 const preview = {
-  questions: [...s3.questions.filter(question => question.name !== 'outputDir')],
+  questions: [
+	  {
+		  type: 'input',
+		  name: 'bucket',
+		  message: 'Please fill in the name for the S3 Bucket:',
+		  errorMessage: 'Missing bucket',
+		  validate: validateNotEmpty,
+		  required: true,
+	  },
+	  {
+		  type: 'input',
+		  name: 'accessKeyId',
+		  message: 'Please fill in the accessKeyId for the S3 Bucket:',
+		  errorMessage: 'Missing accessKeyId',
+		  validate: validateNotEmpty,
+		  required: true,
+	  },
+	  {
+		  type: 'input',
+		  name: 'secretAccessKey',
+		  message: 'Please fill in the secretAccessKey for the S3 Bucket:',
+		  validate: validateNotEmpty,
+		  errorMessage: 'Missing secretAccessKey',
+		  required: true,
+	  },
+
+	  {
+		  type: 'input',
+		  name: 'outputDir',
+		  description: 'Please fill in the target directory:',
+		  default: () => {
+		    return `${uuid()}/`
+          },
+		  validate: validateNotEmpty,
+		  errorMessage: 'Missing target ',
+		  required: true,
+	  },
+
+  ],
   async action(data) {
     if (!data.outputDir) {
       data.outputDir = `${uuid()}/`;
@@ -25,7 +64,7 @@ const preview = {
       remotePath: `${data.outputDir}/`,
       glob: '*.*', // default is '*.*'
       concurrency: '200', // default is 100
-      dryRun: false, // default is false
+      dryRun: true, // default is false
       // cacheControl: 'max-age=300', // can be a string, for all uploade resources
       cacheControl: {
         // or an object with globs as keys to match the input path

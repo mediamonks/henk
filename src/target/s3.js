@@ -1,17 +1,11 @@
 const validateActionInput = require('../util/validateActionInput');
-const validateRelativeUrls = require('../util/validate/validateRelativeUrls');
+const validateNotOutsideWorkingDir = require('../util/validate/validateNotOutsideWorkingDir');
 const validateNotEmpty = require('../util/validate/validateNotEmpty');
 const Uploader = require('s3-batch-upload').default;
 const opener = require('opener');
 
 module.exports = {
   questions: [
-    {
-      name: 'inputDir',
-      errorMessage: 'Missing inputDir',
-      validate: validateRelativeUrls,
-      required: true,
-    },
     {
       type: 'input',
       name: 'bucket',
@@ -66,8 +60,6 @@ module.exports = {
       },
     }).upload();
 
-    console.log(`go to http://${data.bucket}.s3.amazonaws.com/${data.outputDir}index.html`);
-
-    opener(`http://${data.bucket}.s3.amazonaws.com/${data.outputDir}index.html`);
+    console.log(`go to http://${data.bucket}.s3.amazonaws.com/${data.outputDir}`);
   },
 };

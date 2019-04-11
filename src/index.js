@@ -2,16 +2,17 @@
 // const prepare = require("./prepare");
 const targets = require('./target');
 const conditionalPrompt = require('./util/conditionalPrompt');
-const validateRelativeUrls = require('./util/validate/validateRelativeUrls');
+const validateNotOutsideWorkingDir = require('./util/validate/validateNotOutsideWorkingDir');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
+const path = require('path');
 
 module.exports = async (data = {}) => {
   // checking for a .henkrc
-  const hasGitIgnore = await fs.pathExists('./.gitignore');
+  let hasGitIgnore = await fs.pathExists('./.gitignore');
 
   // checking if .gitignore is exists
-  if ((await fs.pathExists('./.git')) && !hasGitIgnore) {
+  if (!hasGitIgnore) {
     const { shouldCreateGitIgnore } = await inquirer.prompt({
       type: 'confirm',
       name: 'shouldCreateGitIgnore',
@@ -19,23 +20,26 @@ module.exports = async (data = {}) => {
     });
 
     if (shouldCreateGitIgnore) {
-      fs.outputFile('./.gitignore', '.henkrc');
+      hasGitIgnore = true;
+      await fs.outputFile('./.gitignore', '');
     }
   }
 
-  const gitIgnoreContent = await fs.readFile('./.gitignore', 'utf8');
+  if (hasGitIgnore) {
+    const gitIgnoreContent = await fs.readFile('./.gitignore', 'utf8');
 
-  const regEx = /\.henkrc/gm;
+    const regEx = /\.henkrc/gm;
 
-  if (!regEx.test(gitIgnoreContent)) {
-    const { shouldAddIt } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'shouldAddIt',
-      message: 'No .henkrc was added to the .gitignore, should i add it?',
-    });
+    if (!regEx.test(gitIgnoreContent)) {
+      const { shouldAddIt } = await inquirer.prompt({
+        type: 'confirm',
+        name: 'shouldAddIt',
+        message: 'No .henkrc was added to the .gitignore, should i add it?',
+      });
 
-    if (shouldAddIt) {
-      fs.outputFile('./.gitignore', gitIgnoreContent.replace(/\n$/, '') + '\n.henkrc');
+      if (shouldAddIt) {
+        fs.outputFile('./.gitignore', gitIgnoreContent.replace(/\n$/, '') + '\n.henkrc');
+      }
     }
   }
 
@@ -59,8 +63,8 @@ module.exports = async (data = {}) => {
       choices: [
         { name: 'Mediamonks Preview', value: 'mm-preview' },
         { name: 'Amazon S3', value: 's3' },
-        { name: 'Netflix Monet', value: 'monet' },
-        { name: 'Google DoubleClick Studio', value: 'doubleclick' },
+        { name: 'Netflix Monet', value: 'monet', disabled: true },
+        { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],
     },
   ]);
@@ -75,8 +79,11 @@ module.exports = async (data = {}) => {
     type: 'input',
     name: 'inputDir',
     message: 'What directory you want to upload?',
-    validate: validateRelativeUrls,
+    validate: validateNotOutsideWorkingDir,
   });
+
+  // force relative directories.
+  data.inputDir = path.relative('./', data.inputDir);
 
   // checking if inputDir exist
   //

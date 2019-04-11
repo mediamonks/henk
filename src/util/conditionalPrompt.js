@@ -1,6 +1,6 @@
-const inquirer = require("inquirer");
+const inquirer = require('inquirer');
 
-module.exports = async function conditionalPrompt(credentials, questions) {
+module.exports = async function conditionalPrompt(data, questions) {
   if (!(questions instanceof Array)) {
     questions = [questions];
   }
@@ -8,13 +8,17 @@ module.exports = async function conditionalPrompt(credentials, questions) {
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
 
-    if (!credentials[question.name]) {
-      credentials = {
-        ...credentials,
-        ...(await inquirer.prompt(question))
+    // check if data is already there, or validate with validator if validate is there.
+    if (
+      data[question.name] === undefined ||
+      (question.validate && question.validate(data[question.name]))
+    ) {
+      data = {
+        ...data,
+        ...(await inquirer.prompt(question)),
       };
     }
   }
 
-  return credentials;
+  return data;
 };
