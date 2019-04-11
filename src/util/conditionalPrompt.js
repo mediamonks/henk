@@ -1,4 +1,7 @@
 const inquirer = require('inquirer');
+const chalk = require('chalk');
+
+const error = chalk.bold.red;
 
 module.exports = async function conditionalPrompt(data, questions) {
   if (!(questions instanceof Array)) {
@@ -11,8 +14,12 @@ module.exports = async function conditionalPrompt(data, questions) {
     // check if data is already there, or validate with validator if validate is there.
     if (
       data[question.name] === undefined ||
-      (question.validate && question.validate(data[question.name]))
+      (question.validate && question.validate(data[question.name]) !== true )
     ) {
+      if((question.validate && question.validate(data[question.name]) !== true)){
+        console.log(error(question.validate(data[question.name])));
+      }
+
       data = {
         ...data,
         ...(await inquirer.prompt(question)),
