@@ -16,7 +16,7 @@ module.exports = async function conditionalPrompt(data, questions) {
       data[question.name] === undefined ||
       (question.validate && question.validate(data[question.name]) !== true )
     ) {
-      if((question.validate && question.validate(data[question.name]) !== true)){
+      if(data[question.name] !== undefined && (question.validate && question.validate(data[question.name]) !== true)){
         console.log(error(question.validate(data[question.name])));
       }
 

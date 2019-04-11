@@ -20,6 +20,7 @@
     "url": "git+https://github.com/mediamonks/henk.git"
   },
   "dependencies": {
+    "basic-ftp": "^3.4.4",
     "chai": "^4.2.0",
     "commander": "^2.19.0",
     "fs-extra": "^7.0.1",
