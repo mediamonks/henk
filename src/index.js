@@ -63,6 +63,7 @@ module.exports = async (data = {}) => {
       choices: [
         { name: 'Mediamonks Preview', value: 'mm-preview' },
         { name: 'Amazon S3', value: 's3' },
+        { name: 'FTP (alpha)', value: 'ftp' },
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],
@@ -86,8 +87,6 @@ module.exports = async (data = {}) => {
   data.inputDir = path.relative('./', data.inputDir);
 
   // checking if inputDir exist
-  //
-
   data = await conditionalPrompt(data, target.questions);
 
   await fs.writeJson('./.henkrc', data);
