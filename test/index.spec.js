@@ -16,10 +16,10 @@ describe('test validateNotOutsideWorkingDir', () => {
 
 		const absolutePath = path.resolve('../../');
 
-		expect(validateNotOutsideWorkingDir('/')).to.equal("url can go outside working directory");
-		expect(validateNotOutsideWorkingDir(absolutePath)).to.equal("url can go outside working directory");
-		expect(validateNotOutsideWorkingDir('../')).to.equal("url can go outside working directory");
-		expect(validateNotOutsideWorkingDir('../**/*')).to.equal("url can go outside working directory");
+		expect(validateNotOutsideWorkingDir('/')).to.equal("paths can not go outside working directory");
+		expect(validateNotOutsideWorkingDir(absolutePath)).to.equal("paths can not go outside working directory");
+		expect(validateNotOutsideWorkingDir('../')).to.equal("paths can not go outside working directory");
+		expect(validateNotOutsideWorkingDir('../**/*')).to.equal("paths can not go outside working directory");
 	});
 
 	it('expect inside working dir paths to return a true', () => {
