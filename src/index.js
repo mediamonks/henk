@@ -7,7 +7,7 @@ const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const path = require('path');
 
-module.exports = async (data = {}) => {
+module.exports = async (data = {}, cli) => {
   // checking for a .henkrc
   let hasGitIgnore = await fs.pathExists('./.gitignore');
 
@@ -91,5 +91,21 @@ module.exports = async (data = {}) => {
 
   await fs.writeJson('./.henkrc', data);
 
-  target.action(data);
+  await target.action(data);
+
+  console.log(`
+              +hho.      
+             -MMMMm      
+            .dMMMMm      
+          \`oNMMMMM/\`\`\`\`  
+\`\`\`\`\`\`  ./dMMMMMMNmmmmdh:
+dmmmmm//mMMMMMMMMMMMMMMMN
+MMMMMMooMMMMMMMMMMMMMMMMo
+MMMMMMooMMMMMMMMMMMMMMMM:
+MMmmMMooMMMMMMMMMMMMMMMd 
+MM//MMooMMMMMMMMMMMMMMM/ 
+hddddd::dmMMMMMMMMMMMMh  
+          \`-/oyhhddhy+\`  
+
+  `);
 };

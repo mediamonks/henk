@@ -4,4 +4,5 @@ module.exports = {
 	doubleclick: require("./doubleclick.js"),
 	monet: require("./monet.js"),
 	ftp: require("./ftp.js"),
+	sftp: require("./sftp.js"),
 };

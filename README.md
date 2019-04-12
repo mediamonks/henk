@@ -2,18 +2,27 @@
 
 Uploading files to a location.
 
-See documentation https://assets-at-scale.gitbook.io/temple-suite/
+Currently supported
 
+* MediaMonks Preview
+* S3
+* FTP (alpha)
 
 ## Installation
-
 ```sh
-yarn add @mediamonks/henk
+yarn global add @mediamonks/henk
 ```
 
 ```sh
-npm i -S @mediamonks/henk
+npm i -G @mediamonks/henk
 ```
+
+## Lets start
+```sh
+henk
+```
+
+
 
 ## LICENSE
 
