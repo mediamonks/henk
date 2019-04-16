@@ -82,17 +82,16 @@ module.exports = {
         const inputFilePath = files[i];
         const outputFilePath = path.join(data.outputDir, relativeFiles[i]);
 
-        if(!(await isFile(inputFilePath))){
-	        try {
-		        await sftp.mkdir(outputFilePath, true);
-	        } catch (e) {}
+        if (!(await isFile(inputFilePath))) {
+          try {
+            await sftp.mkdir(outputFilePath, true);
+          } catch (e) {}
         } else {
           await sftp.fastPut(inputFilePath, outputFilePath);
         }
 
         bar.tick();
       }
-
     } catch (err) {
       console.log(err);
     }
