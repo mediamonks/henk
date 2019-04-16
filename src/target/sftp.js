@@ -2,6 +2,10 @@ const validateActionInput = require('../util/validateActionInput');
 const validateNotOutsideWorkingDir = require('../util/validate/validateNotOutsideWorkingDir');
 const validateNotEmpty = require('../util/validate/validateNotEmpty');
 const Client = require('ssh2-sftp-client');
+const glob = require('glob-promise');
+const path = require('path');
+const isFile = require('../util/isFile');
+const ProgressBar = require('progress');
 
 module.exports = {
   questions: [
@@ -55,9 +59,40 @@ module.exports = {
         secure: data.secure,
       });
 
-      const fileList = await sftp.list('./');
+      try {
+        await sftp.mkdir(data.outputDir, true);
+      } catch (e) {}
 
-      console.log(fileList);
+      if (/\*/.test(data.inputDir)) {
+        throw new Error('Globbing pattern is not allowed');
+      }
+
+      const inputDir = path.join(data.inputDir, '**/*');
+      const files = await glob(inputDir);
+
+      const bar = new ProgressBar('[:bar] :percent | :etas | :current / :total | :rate/fps ', {
+        total: files.length,
+        complete: '=',
+        incomplete: ' ',
+        width: 20,
+      });
+
+      const relativeFiles = files.map(file => path.relative(data.inputDir, file));
+      for (let i = 0; i < relativeFiles.length; i++) {
+        const inputFilePath = files[i];
+        const outputFilePath = path.join(data.outputDir, relativeFiles[i]);
+
+        if(!(await isFile(inputFilePath))){
+	        try {
+		        await sftp.mkdir(outputFilePath, true);
+	        } catch (e) {}
+        } else {
+          await sftp.fastPut(inputFilePath, outputFilePath);
+        }
+
+        bar.tick();
+      }
+
     } catch (err) {
       console.log(err);
     }

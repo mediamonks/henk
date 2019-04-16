@@ -24,6 +24,7 @@
     "chai": "^4.2.0",
     "commander": "^2.19.0",
     "fs-extra": "^7.0.1",
+    "glob-promise": "^3.4.0",
     "inquirer": "^6.2.2",
     "mocha": "^6.0.2",
     "opener": "^1.5.1",

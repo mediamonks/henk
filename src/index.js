@@ -64,6 +64,7 @@ module.exports = async (data = {}, cli) => {
         { name: 'Mediamonks Preview', value: 'mm-preview' },
         { name: 'Amazon S3', value: 's3' },
         { name: 'FTP (alpha)', value: 'ftp' },
+        { name: 'SFTP (alpha)', value: 'sftp' },
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],
@@ -73,7 +74,7 @@ module.exports = async (data = {}, cli) => {
   const target = targets[data.type];
 
   if (!target) {
-    throw new Error(`inknown target ${data.type}`);
+    throw new Error(`unknown target ${data.type}`);
   }
 
   data = await conditionalPrompt(data, {
@@ -93,19 +94,5 @@ module.exports = async (data = {}, cli) => {
 
   await target.action(data);
 
-  console.log(`
-              +hho.      
-             -MMMMm      
-            .dMMMMm      
-          \`oNMMMMM/\`\`\`\`  
-\`\`\`\`\`\`  ./dMMMMMMNmmmmdh:
-dmmmmm//mMMMMMMMMMMMMMMMN
-MMMMMMooMMMMMMMMMMMMMMMMo
-MMMMMMooMMMMMMMMMMMMMMMM:
-MMmmMMooMMMMMMMMMMMMMMMd 
-MM//MMooMMMMMMMMMMMMMMM/ 
-hddddd::dmMMMMMMMMMMMMh  
-          \`-/oyhhddhy+\`  
-
-  `);
+  console.log(`Done, Have a nice day.`);
 };

@@ -39,9 +39,7 @@ const preview = {
 		  type: 'input',
 		  name: 'outputDir',
 		  description: 'Please fill in the target directory:',
-		  default: () => {
-		    return `${uuid()}/`
-          },
+		  default: () => `${uuid()}/`,
 		  validate: validateNotEmpty,
 		  errorMessage: 'Missing target ',
 		  required: true,
