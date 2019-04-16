@@ -63,8 +63,8 @@ module.exports = async (data = {}, cli) => {
       choices: [
         { name: 'Mediamonks Preview', value: 'mm-preview' },
         { name: 'Amazon S3', value: 's3' },
-        { name: 'FTP (alpha)', value: 'ftp' },
         { name: 'SFTP (alpha)', value: 'sftp' },
+        { name: 'FTP', value: 'ftp', disabled: true },
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],

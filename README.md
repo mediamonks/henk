@@ -6,7 +6,7 @@ Currently supported
 
 * MediaMonks Preview
 * S3
-* FTP (alpha)
+* SFTP (alpha)
 
 ## Installation
 ```sh
