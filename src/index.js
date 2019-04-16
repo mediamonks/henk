@@ -7,7 +7,7 @@ const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const path = require('path');
 
-module.exports = async (data = {}) => {
+module.exports = async (data = {}, cli) => {
   // checking for a .henkrc
   let hasGitIgnore = await fs.pathExists('./.gitignore');
 
@@ -63,6 +63,8 @@ module.exports = async (data = {}) => {
       choices: [
         { name: 'Mediamonks Preview', value: 'mm-preview' },
         { name: 'Amazon S3', value: 's3' },
+        { name: 'SFTP (alpha)', value: 'sftp' },
+        { name: 'FTP', value: 'ftp', disabled: true },
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],
@@ -72,7 +74,7 @@ module.exports = async (data = {}) => {
   const target = targets[data.type];
 
   if (!target) {
-    throw new Error(`inknown target ${data.type}`);
+    throw new Error(`unknown target ${data.type}`);
   }
 
   data = await conditionalPrompt(data, {
@@ -86,11 +88,11 @@ module.exports = async (data = {}) => {
   data.inputDir = path.relative('./', data.inputDir);
 
   // checking if inputDir exist
-  //
-
   data = await conditionalPrompt(data, target.questions);
 
   await fs.writeJson('./.henkrc', data);
 
-  target.action(data);
+  await target.action(data);
+
+  console.log(`Done, Have a nice day.`);
 };

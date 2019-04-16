@@ -30,13 +30,12 @@ module.exports = {
       errorMessage: 'Missing secretAccessKey',
       required: true,
     },
-
     {
       type: 'input',
       name: 'outputDir',
       description: 'Please fill in the target directory:',
       validate: validateNotEmpty,
-      errorMessage: 'Missing target ',
+      errorMessage: 'Missing outputDir',
       required: true,
     },
   ],
@@ -44,7 +43,7 @@ module.exports = {
     validateActionInput(data, this.questions);
 
     await new Uploader({
-      config: './.previewsrc', // can also use environment variables
+      config: './.henkrc', // can also use environment variables
       bucket: data.bucket,
       localPath: `${data.inputDir}`,
       remotePath: `${data.outputDir}`,

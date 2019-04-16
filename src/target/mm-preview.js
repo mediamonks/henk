@@ -39,9 +39,7 @@ const preview = {
 		  type: 'input',
 		  name: 'outputDir',
 		  description: 'Please fill in the target directory:',
-		  default: () => {
-		    return `${uuid()}/`
-          },
+		  default: () => `${uuid()}/`,
 		  validate: validateNotEmpty,
 		  errorMessage: 'Missing target ',
 		  required: true,
@@ -64,7 +62,7 @@ const preview = {
       remotePath: `${data.outputDir}/`,
       glob: '*.*', // default is '*.*'
       concurrency: '200', // default is 100
-      dryRun: true, // default is false
+      dryRun: false, // default is false
       // cacheControl: 'max-age=300', // can be a string, for all uploade resources
       cacheControl: {
         // or an object with globs as keys to match the input path

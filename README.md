@@ -6,8 +6,7 @@ Currently supported
 
 * MediaMonks Preview
 * S3
-* FTP (alpha)
-* SFTP/SSH (working on)
+* SFTP/SSH
 * Google DoubleClick Studio (working on)
 * Netflix Monet (working on)
 
