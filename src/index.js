@@ -3,13 +3,17 @@
 const targets = require('./target');
 const conditionalPrompt = require('./util/conditionalPrompt');
 const validateNotOutsideWorkingDir = require('./util/validate/validateNotOutsideWorkingDir');
+const Filenames = require('./data/Filenames');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const path = require('path');
 
 module.exports = async (data = {}, cli) => {
+  const filepathRc = `./${Filenames.RC}`;
+  const filepathGitIgnore = `./${Filenames.GITIGNORE}`;
+
   // checking for a .henkrc
-  let hasGitIgnore = await fs.pathExists('./.gitignore');
+  let hasGitIgnore = await fs.pathExists(filepathGitIgnore);
 
   // checking if .gitignore is exists
   if (!hasGitIgnore) {
@@ -21,35 +25,35 @@ module.exports = async (data = {}, cli) => {
 
     if (shouldCreateGitIgnore) {
       hasGitIgnore = true;
-      await fs.outputFile('./.gitignore', '');
+      await fs.outputFile(filepathGitIgnore, '');
     }
   }
 
   if (hasGitIgnore) {
-    const gitIgnoreContent = await fs.readFile('./.gitignore', 'utf8');
+    const gitIgnoreContent = await fs.readFile(filepathGitIgnore, 'utf8');
 
-    const regEx = /\.henkrc/gm;
+    const regEx = new RegExp(Filenames.RC, 'gm');
 
     if (!regEx.test(gitIgnoreContent)) {
       const { shouldAddIt } = await inquirer.prompt({
         type: 'confirm',
         name: 'shouldAddIt',
-        message: 'No .henkrc was added to the .gitignore, should i add it?',
+        message: `No ${Filenames.RC} was added to the ${Filenames.GITIGNORE}, should i add it?`,
       });
 
       if (shouldAddIt) {
-        fs.outputFile('./.gitignore', gitIgnoreContent.replace(/\n$/, '') + '\n.henkrc');
+        fs.outputFile(filepathGitIgnore, gitIgnoreContent.replace(/\n$/, '') + `\n${Filenames.RC}`);
       }
     }
   }
 
-  if (await fs.pathExists('./.henkrc')) {
-    const henkrc = await fs.readJson('./.henkrc');
+  if (await fs.pathExists(filepathRc)) {
+    const rc = await fs.readJson(filepathRc);
 
     // if type of provided argument is not the same ignore henkrc file.
-    if (!data.type || henkrc.type === data.type) {
+    if (!data.type || rc.type === data.type) {
       data = {
-        ...henkrc,
+        ...rc,
         ...data,
       };
     }
@@ -90,8 +94,7 @@ module.exports = async (data = {}, cli) => {
   // checking if inputDir exist
   data = await conditionalPrompt(data, target.questions);
 
-  await fs.writeJson('./.henkrc', data);
-
+  await fs.writeJson(filepathRc, data);
   await target.action(data);
 
   console.log(`Done, Have a nice day.`);
