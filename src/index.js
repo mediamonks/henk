@@ -68,6 +68,7 @@ module.exports = async (data = {}, cli) => {
         { name: 'Mediamonks Preview', value: 'mm-preview' },
         { name: 'Amazon S3', value: 's3' },
         { name: 'SFTP (alpha)', value: 'sftp' },
+        { name: 'Flashtalking', value: 'flashtalking' },
         { name: 'FTP', value: 'ftp', disabled: true },
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
