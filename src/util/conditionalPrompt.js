@@ -12,11 +12,14 @@ module.exports = async function conditionalPrompt(data, questions) {
     const question = questions[i];
 
     // check if data is already there, or validate with validator if validate is there.
+    //console.log(question.validate)
+
     if (
       data[question.name] === undefined ||
       (question.validate && question.validate(data[question.name]) !== true)
     ) {
-      // show message
+      // question doesn't have answer yet, show message
+
       if (
         data[question.name] !== undefined &&
         (question.validate && question.validate(data[question.name]) !== true)

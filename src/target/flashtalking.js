@@ -46,6 +46,8 @@ module.exports = {
     const filepathRc = `./${Filenames.RC}`;
     const inputDir = `./${data.inputDir}`;
 
+    // TO DO: Validate login with API?
+
     if (data.libraryId === '') {
       // make new library
       const { libraryName } = await inquirer.prompt({
@@ -69,17 +71,21 @@ module.exports = {
       console.log('Created new library with id ' + library.id);
       data.libraryId = library.id;
 
-      await fs.writeJson(filepathRc, data);
+
+      let rcData = await fs.readJson(filepathRc);
+      const overwriteIndex = rcData.uploadConfigs.findIndex(config => config.type === data.type);
+
+      rcData.uploadConfigs[overwriteIndex] = data;
+
+      await fs.writeJson(filepathRc, rcData);
     }
 
     const files = await fs.readdir(inputDir)
     const zipFiles = files.filter(filename => filename.substr(filename.length-4, filename.length) === '.zip');
+
     //console.log(zipFiles)
 
     for (const filename of zipFiles) {
-      // const contents = await fs.readFile(file, 'utf8');
-      // console.log(contents);
-
       const filepath = inputDir + '/' + filename;
 
       console.log('uploading ' + filepath)
@@ -87,15 +93,11 @@ module.exports = {
         overwriteExistingImages: true
       });
 
-      //console.log(uploadResult)
-
       if (uploadResult.status === 200 && uploadResult.data) {
         console.log('Success! creative ID = ' + uploadResult.data.id);
       }
 
       else {
-        //console.log('Upload failed due to error.');
-
         if (uploadResult.response) {
 
           if (uploadResult.response.status === 400 && uploadResult.response.data) {
@@ -116,25 +118,6 @@ module.exports = {
         }
       }
     }
-
-    // await new Uploader({
-    //   config: './.henkrc', // can also use environment variables
-    //   bucket: data.bucket,
-    //   localPath: `${data.inputDir}`,
-    //   remotePath: `${data.outputDir}`,
-    //   glob: '*.*', // default is '*.*'
-    //   concurrency: '200', // default is 100
-    //   dryRun: false, // default is false
-    //   // cacheControl: 'max-age=300', // can be a string, for all uploade resources
-    //   cacheControl: {
-    //     // or an object with globs as keys to match the input path
-    //     // '**/settings.json': 'max-age=60', // 1 mins for settings, specific matches should go first
-    //     // '**/*.json': 'max-age=300', // 5 mins for other jsons
-    //     '**/*.*': 'max-age=60', // 1 hour for everthing else
-    //   },
-    // }).upload();
-
-    //console.log(`go to http://${data.bucket}.s3.amazonaws.com/${data.outputDir}`);
 
     console.log("Finished uploading!")
   },

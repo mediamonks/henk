@@ -48,10 +48,13 @@ module.exports = async (data = {}, cli) => {
   }
 
   if (await fs.pathExists(filepathRc)) {
-    const rc = await fs.readJson(filepathRc);
+    let rc = await fs.readJson(filepathRc);
+
+    console.log(rc);
 
     // if type of provided argument is not the same ignore henkrc file.
     if (!data.type || rc.type === data.type) {
+      console.log("type of provided argument is not the same ignore henkrc file")
       data = {
         ...rc,
         ...data,
@@ -59,8 +62,7 @@ module.exports = async (data = {}, cli) => {
     }
   }
 
-  data = await conditionalPrompt(data, [
-    {
+  const uploadTarget = await inquirer.prompt({
       type: 'list',
       name: 'type',
       message: 'Where do you want to upload?',
@@ -73,16 +75,18 @@ module.exports = async (data = {}, cli) => {
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],
-    },
-  ]);
+  });
 
-  const target = targets[data.type];
+  const target = targets[uploadTarget.type];
 
   if (!target) {
-    throw new Error(`unknown target ${data.type}`);
+    throw new Error(`unknown target ${uploadTarget.type}`);
   }
 
-  data = await conditionalPrompt(data, {
+  let [ targetData ] = data.uploadConfigs.filter( config => config.type === uploadTarget.type ) ;
+  if (!targetData) targetData = { type: uploadTarget.type };
+
+  targetData = await conditionalPrompt(targetData, {
     type: 'input',
     name: 'inputDir',
     message: 'What directory you want to upload?',
@@ -90,13 +94,25 @@ module.exports = async (data = {}, cli) => {
   });
 
   // force relative directories.
-  data.inputDir = path.relative('./', data.inputDir);
+  targetData.inputDir = path.relative('./', targetData.inputDir);
 
   // checking if inputDir exist
-  data = await conditionalPrompt(data, target.questions);
+  targetData = await conditionalPrompt(targetData, target.questions);
+
+  // find and overwrite the correct object in the array data.uploadConfigs
+  const overwriteIndex = data.uploadConfigs.findIndex((config => config.type === targetData.type));
+
+  if (overwriteIndex === -1) {
+    console.log("adding new object to data")
+    data.uploadConfigs.push(targetData); //this config was not in the henkrc yet so adding a new object
+  }
+  else {
+    data.uploadConfigs[overwriteIndex] = targetData; //found it, so overwriting the existing object
+  }
 
   await fs.writeJson(filepathRc, data);
-  await target.action(data);
+
+  await target.action(targetData);
 
   console.log(`Done, Have a nice day.`);
 };
