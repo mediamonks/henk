@@ -48,17 +48,17 @@ module.exports = async (data = {}, cli) => {
   }
 
   if (await fs.pathExists(filepathRc)) {
+    console.log('henkrc exists. using data from rc file')
     let rc = await fs.readJson(filepathRc);
+    data = {
+      ...rc,
+    };
+  }
 
-    console.log(rc);
-
-    // if type of provided argument is not the same ignore henkrc file.
-    if (!data.type || rc.type === data.type) {
-      console.log("type of provided argument is not the same ignore henkrc file")
-      data = {
-        ...rc,
-        ...data,
-      };
+  else {
+    console.log('henkrc doesnt exist, creating creating new data obj')
+    data = {
+      uploadConfigs: []
     }
   }
 
@@ -71,11 +71,14 @@ module.exports = async (data = {}, cli) => {
         { name: 'Amazon S3', value: 's3' },
         { name: 'SFTP (alpha)', value: 'sftp' },
         { name: 'Flashtalking', value: 'flashtalking' },
+        { name: 'Workspace', value: 'workspace' },
         { name: 'FTP', value: 'ftp', disabled: true },
         { name: 'Netflix Monet', value: 'monet', disabled: true },
         { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
       ],
   });
+
+
 
   const target = targets[uploadTarget.type];
 
@@ -85,6 +88,14 @@ module.exports = async (data = {}, cli) => {
 
   let [ targetData ] = data.uploadConfigs.filter( config => config.type === uploadTarget.type ) ;
   if (!targetData) targetData = { type: uploadTarget.type };
+
+  //console.log(targetData);
+
+  // let targetData = {};
+  // if (data.uploadConfigs) [ targetData ] = data.uploadConfigs.filter( config => config.type === uploadTarget.type );
+  // else targetData = { type: uploadTarget.type };
+  // [ targetData ] = data.uploadConfigs.filter( config => config.type === uploadTarget.type );
+
 
   targetData = await conditionalPrompt(targetData, {
     type: 'input',

@@ -7,9 +7,6 @@ const Filenames = require('../data/Filenames');
 const fs = require('fs-extra');
 const path = require('path');
 
-const Uploader = require('s3-batch-upload').default;
-const opener = require('opener');
-
 module.exports = {
   questions: [
     {
@@ -41,7 +38,9 @@ module.exports = {
     validateActionInput(data, this.questions);
     console.log(data.inputDir)
 
-    const auth = 'Basic ' + new Buffer(data.accountEmail+':'+data.accountPassword).toString('base64');
+    //const auth = 'Basic ' + new Buffer(data.accountEmail+':'+data.accountPassword).toString('base64');
+    const auth = 'Basic ' + new Buffer.from(data.accountEmail+':'+data.accountPassword).toString('base64');
+
     const ft_api = new Flashtalking(auth);
     const filepathRc = `./${Filenames.RC}`;
     const inputDir = `./${data.inputDir}`;
