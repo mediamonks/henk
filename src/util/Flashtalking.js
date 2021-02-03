@@ -228,4 +228,24 @@ module.exports = class Flashtalking {
       return error;
     }
   }
+
+
+  async getPreview(libraryId = '') {
+    //libraryId - string - library ID
+
+    const url = 'https://api.flashtalking.net/crm/v1/creative-libraries/' + libraryId;
+
+    const headers = {
+      'Authorization': this.auth
+    }
+
+    try {
+      const results = await axios.get(url, { headers })
+      return results.data;
+    }
+
+    catch(err) {
+      console.log(err.response.data)
+    }
+  }
 }

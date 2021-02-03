@@ -12,7 +12,7 @@ module.exports = {
     {
       type: 'input',
       name: 'accountEmail',
-      message: 'email',
+      message: 'Email',
       errorMessage: 'Missing email',
       validate: validateEmail,
       required: true,
@@ -20,7 +20,7 @@ module.exports = {
     {
       type: 'password',
       name: 'accountPassword',
-      message: 'password',
+      message: 'Password',
       validate: validateNotEmpty,
       errorMessage: 'Missing password',
       required: true,
@@ -29,6 +29,7 @@ module.exports = {
       type: 'input',
       name: 'libraryId',
       message: 'Library ID (find 4-digit id in URL: https://workspace.mediamonks.com/backend/project-folder/view?id=XXXX)',
+      validate: validateNotEmpty,
       errorMessage: 'Missing Library ID',
       required: false,
     }

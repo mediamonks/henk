@@ -137,5 +137,7 @@ module.exports = class WorkspaceAPI {
             }
         }
 
+        console.log('https://workspace.mediamonks.com/backend/project-folder/view?id=' + options.libraryId)
+
     }
 }

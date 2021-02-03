@@ -45,16 +45,8 @@ module.exports = {
   async action(data) {
     validateActionInput(data, this.questions);
 
-
-
-    const filepathRc = `./${Filenames.RC}`;
-    let rcData = await fs.readJson(filepathRc);
-    const s3Index = rcData.uploadConfigs.findIndex(config => config.type === data.type);
-
-    console.log(data);
-
     await new Uploader({
-      // config: data, // can also use environment variables
+      config: data, // can also use environment variables
       bucket: data.bucket,
       localPath: `${data.inputDir}`,
       remotePath: `${data.outputDir}`,

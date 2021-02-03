@@ -31,7 +31,7 @@
     "mocha": "^6.0.2",
     "opener": "^1.5.1",
     "puppeteer": "^6.0.0",
-    "s3-batch-upload": "^1.4.0",
+    "s3-batch-upload": "^1.5.0",
     "ssh2-sftp-client": "^2.5.0",
     "uuid": "^3.3.2",
     "uuidv4": "^3.0.1"
