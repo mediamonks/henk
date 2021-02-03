@@ -7,9 +7,9 @@ Currently supported
 * MediaMonks Preview
 * S3
 * SFTP/SSH
-* Flashtalking (alpha)
-* Google DoubleClick Studio (working on)
-* Netflix Monet (working on)
+* Flashtalking
+* Workspace
+* Google DoubleClick Studio
 
 
 ## Installation
