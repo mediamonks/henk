@@ -25,7 +25,7 @@ npm i -G @mediamonks/henk
 ```sh
 henk
 ```
-
+Now that the CLI guides you through uploads
 
 
 ## LICENSE
