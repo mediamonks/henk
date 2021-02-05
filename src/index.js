@@ -48,11 +48,36 @@ module.exports = async (data = {}, cli) => {
   }
 
   if (await fs.pathExists(filepathRc)) {
-    console.log('henkrc exists. using data from rc file')
-    let rc = await fs.readJson(filepathRc);
-    data = {
-      ...rc,
-    };
+    // henkrc exists, reading data and validating
+    let rc = {};
+
+    try {
+      rc = await fs.readJson(filepathRc);
+    }
+
+    catch (err) {
+      throw new Error('cant read json from .henkrc, please delete it and try again');
+    }
+
+    if (rc.hasOwnProperty('uploadConfigs')) {
+      data = {
+        ...rc,
+      };
+    }
+
+    else { // henkrc exists but not in correct new structure
+      if (rc.hasOwnProperty('type')) { // looks like the object follows old structure
+        data = {
+          uploadConfigs: [ ...rc ]
+        }
+      }
+
+      else { // no compatible structure found, creating new
+        data = {
+          uploadConfigs: []
+        }
+      }
+    }
   }
 
   else {
@@ -62,23 +87,28 @@ module.exports = async (data = {}, cli) => {
     }
   }
 
+  const choices = [
+    { name: 'Mediamonks Preview', value: 'mm-preview' },
+    { name: 'Workspace', value: 'workspace' },
+    { name: 'Flashtalking', value: 'flashtalking' },
+    { name: 'SFTP (alpha)', value: 'sftp' },
+    // { name: 'Amazon S3', value: 's3', disabled: true },
+    // { name: 'FTP', value: 'ftp', disabled: true },
+    // { name: 'Netflix Monet', value: 'monet', disabled: true },
+    // { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true }
+  ];
+
+  data.uploadConfigs.forEach( config => {
+    const configIndex = choices.findIndex(choice => config.type === choice.value);
+    if (configIndex !== -1) choices[configIndex].name += ' (Config Found)';
+  })
+
   const uploadTarget = await inquirer.prompt({
       type: 'list',
       name: 'type',
       message: 'Where do you want to upload?',
-      choices: [
-        { name: 'Mediamonks Preview', value: 'mm-preview' },
-        { name: 'Amazon S3', value: 's3' },
-        { name: 'SFTP (alpha)', value: 'sftp' },
-        { name: 'Flashtalking', value: 'flashtalking' },
-        { name: 'Workspace', value: 'workspace' },
-        { name: 'FTP', value: 'ftp', disabled: true },
-        { name: 'Netflix Monet', value: 'monet', disabled: true },
-        { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true },
-      ],
+      choices: choices,
   });
-
-
 
   const target = targets[uploadTarget.type];
 
@@ -95,7 +125,6 @@ module.exports = async (data = {}, cli) => {
   // if (data.uploadConfigs) [ targetData ] = data.uploadConfigs.filter( config => config.type === uploadTarget.type );
   // else targetData = { type: uploadTarget.type };
   // [ targetData ] = data.uploadConfigs.filter( config => config.type === uploadTarget.type );
-
 
   targetData = await conditionalPrompt(targetData, {
     type: 'input',

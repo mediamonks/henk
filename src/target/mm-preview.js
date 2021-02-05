@@ -51,12 +51,10 @@ const preview = {
       data.outputDir = `${uuid()}/`;
     }
 
-    await fs.writeJson('./.henkrc', data);
-
     validateActionInput(data, this.questions);
 
     await new Uploader({
-      config: './.henkrc', // can also use environment variables
+      config: data, // can also use environment variables
       bucket: data.bucket,
       localPath: `${data.inputDir}`,
       remotePath: `${data.outputDir}/`,
@@ -73,7 +71,6 @@ const preview = {
     }).upload();
 
     console.log(`go to http://${data.bucket}.s3.amazonaws.com/${data.outputDir}index.html`);
-
     opener(`http://${data.bucket}.s3.amazonaws.com/${data.outputDir}index.html`);
   },
 };
