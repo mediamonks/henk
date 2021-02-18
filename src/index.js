@@ -91,11 +91,12 @@ module.exports = async (data = {}, cli) => {
     { name: 'Mediamonks Preview', value: 'mm-preview' },
     { name: 'Workspace', value: 'workspace' },
     { name: 'Flashtalking', value: 'flashtalking' },
+    { name: 'Google DoubleClick Studio', value: 'doubleclick'},
     { name: 'SFTP (alpha)', value: 'sftp' },
     // { name: 'Amazon S3', value: 's3', disabled: true },
     // { name: 'FTP', value: 'ftp', disabled: true },
     // { name: 'Netflix Monet', value: 'monet', disabled: true },
-    // { name: 'Google DoubleClick Studio', value: 'doubleclick', disabled: true }
+
   ];
 
   data.uploadConfigs.forEach( config => {
@@ -143,7 +144,7 @@ module.exports = async (data = {}, cli) => {
   const overwriteIndex = data.uploadConfigs.findIndex((config => config.type === targetData.type));
 
   if (overwriteIndex === -1) {
-    console.log("adding new object to data")
+    //console.log("adding new object to data")
     data.uploadConfigs.push(targetData); //this config was not in the henkrc yet so adding a new object
   }
   else {
