@@ -26,12 +26,10 @@ module.exports = {
   ],
 
   async action(data) {
-    //console.log(`go to https://www.google.com/doubleclick/studio/`);
 
-    //console.log('logging in first if needed')
+    const dc = new DoubleClickStudio();
 
     if (!data.hasOwnProperty('cookies')) {
-
       const { proceedToLogin } = await inquirer.prompt({
         type: 'confirm',
         name: 'proceedToLogin',
@@ -39,207 +37,206 @@ module.exports = {
       });
 
       if (proceedToLogin) {
-        const dcLogin = new DoubleClickStudio({
-          headless: false
-        });
-        await dcLogin.init();
-
-        data.cookies = await dcLogin.login();
-        await dcLogin.close();
+        data.cookies = await dc.login();
+        //await dc.close();
       }
 
       else {
-        return 'mahp mahp'
+        return;
       }
     }
 
     else {
-      console.log('Cookies found. Continuing to Studio.')
+      console.log('User already logged in.')
       // TODO: Should probably add validation for these cookies and check if not expired...
     }
+
+    dc.cookies = data.cookies;
+
+    await writeToHenkrc(data);
     
     //logged in now presumably
-    
-    // see if advertiser exists
-    const dc = new DoubleClickStudio({
-      cookies: data.cookies,
-      headless: true
-    });
 
-    await dc.init();
-
-    const spinner = new Spinner('processing.. %s');
-    spinner.setSpinnerString('/-\\|');
-
-
-    // Find/Create advertiser
+    // Find/create advertiser
+    let advertiser;
     console.log('Advertiser ' + data.advertiserName + ' - seeing if already stored in local henkrc file..')
 
-    if (!data.advertiser) { // no advertiser object in henkrc file found
+    if (!data.advertiser) {
       console.log('Advertiser ' + data.advertiserName + ' - not in henkrc file, seeing if exists in Studio..')
+      let advertisers = await dc.getAdvertiser(data.advertiserName);
+      advertisers = advertisers.data.records;
 
-      //spinner.start();
-      data.advertiser = await dc.getAdvertiser(data.advertiserName);
-      //spinner.stop();
+      if (advertisers.length > 1) {
+        console.log('Advertiser ' + data.advertiserName + ' - Multiple records found. Please choose one.')
+        // advertiser = ;
+        return;
+      }
 
-      //if it doesn't exist on DC yet
-      if (!data.advertiser) {
+      if (advertisers.length === 0) {
         const { createNewAdvertiser } = await inquirer.prompt({
           type: 'confirm',
           name: 'createNewAdvertiser',
           message: 'Advertiser ' + data.advertiserName + ' - doesn\'t exist yet. Should Henk create it now?'
         });
-
         if (!createNewAdvertiser) return ''
-
         console.log('Advertiser ' + data.advertiserName + ' - creating in Studio')
-        data.advertiser = await dc.createAdvertiser(data.advertiserName);
+        const createAdvertiserRequest = await dc.createAdvertiser(data.advertiserName);
         console.log('Advertiser ' + data.advertiserName + ' - created.')
+        advertiser = createAdvertiserRequest.data;
       }
+
+      if (advertisers.length === 1) {
+        [ advertiser ] = advertisers;
+      }
+
+      data.advertiser = advertiser;
     }
 
-    console.log('Advertiser ' + data.advertiserName + ' - selected. ID: ' + data.advertiser.advertiserId + ' & ownerId: ' + data.advertiser.ownerId)
+    console.log('Advertiser ' + data.advertiserName + ' - selected. ID: ' + data.advertiser.id)
 
-    // Find/Create campaign
+
+    // Find/create campaign
+    let campaign;
     console.log('Campaign ' + data.campaignName + ' - seeing if already stored in local henkrc file..')
+
     if (!data.campaign) {
       console.log('Campaign ' + data.campaignName + ' - not in henkrc file, seeing if exists in Studio..')
-      data.campaign = await dc.getCampaign(data.advertiser, data.campaignName);
+      let campaigns = await dc.getCampaign(data.advertiser, data.campaignName);
+      campaigns = campaigns.data.records;
 
-      if (!data.campaign) {
+      if (campaigns.length > 1) {
+        console.log('Campaign ' + data.campaignName + ' - Multiple records found. Please choose one.')
+        // campaigns = ;
+        return;
+      }
+
+      if (campaigns.length === 0) {
         const { createNewCampaign } = await inquirer.prompt({
           type: 'confirm',
           name: 'createNewCampaign',
           message: 'Campaign ' + data.campaignName + ' - doesn\'t exist yet. Should Henk create it now?'
-        }); 
-        
+        });
         if (!createNewCampaign) return ''
-
         console.log('Campaign ' + data.campaignName + ' - creating in Studio')
-        data.campaign = await dc.createCampaign(data.advertiser, data.campaignName);
+        const createCampaignRequest = await dc.createCampaign(data.advertiser, data.campaignName);
         console.log('Campaign ' + data.campaignName + ' - created.')
+        campaign = createCampaignRequest.data;
       }
+
+      if (campaigns.length === 1) {
+        [ campaign ] = campaigns;
+      }
+
+      data.campaign = campaign;
     }
-    console.log('Campaign ' + data.campaignName + ' - selected. ID: ' + data.campaign.campaignId)
+
+    console.log('Campaign ' + data.campaignName + ' - selected. ID: ' + data.campaign.id)
 
 
-    // Find/Create/Upload creatives
+
+    // Find/Create creatives
+    if (!data.creatives) data.creatives = []; // if the creatives array isn't yet in henkrc
+
+    let creative;
     const files = await fs.readdirSync(data.inputDir)
     const zipFiles = files.filter(filename => filename.substr(filename.length-4, filename.length) === '.zip');
 
-    if (!data.creatives) data.creatives = [];
-
     for (const filename of zipFiles) {
       const creativeName = filename.substr(0, filename.indexOf('.html'))
-      let creative;
+      //let creativeSearchResult;
 
       console.log('Creative ' + creativeName + ' - seeing if already stored in local henkrc file..')
+      const theIndex = data.creatives.findIndex(creative => creative.filename === filename);
 
-      if (data.creatives) {
+      if (theIndex === -1) {
+        console.log('Creative ' + creativeName + ' - not in henkrc file, seeing if exists in Studio..')
 
-        const theIndex = data.creatives.findIndex(creative => creative.filename === filename);
+        let searchResult = await dc.getCreative(data.campaign, creativeName);
+        searchResult = searchResult.data.records;
 
-        if (theIndex === -1) {
-          console.log('Creative ' + creativeName + ' - not in henkrc file, seeing if exists in Studio..')
-          creative = await dc.getCreative(data.campaign, creativeName);
+        if (searchResult.length === 0) { // creative doesn't exist on studio yet
+          console.log('Creative ' + creativeName + ' - doesn\'t exist yet. Henk will create one for you.')
 
-          if (!creative) {
-            console.log('Creative ' + creativeName + ' - doesn\'t exist yet. Henk will create one for you.')
+          const { promptName } = await inquirer.prompt({
+            type: 'input',
+            name: 'promptName',
+            message: 'Creative name?',
+            default: creativeName
+          });
 
-            const { promptName } = await inquirer.prompt({
-              type: 'input',
-              name: 'promptName',
-              message: 'Creative name?',
-              default: creativeName
-            });
+          const { promptFormat } = await inquirer.prompt({
+            type: 'list',
+            name: 'promptFormat',
+            message: 'Format?',
+            choices: [
+              { name: 'Inpage', value: 'INPAGE' },
+              { name: 'Expanding', value: 'EXPANDING' },
+            ]
+          });
 
-            const { promptFormat } = await inquirer.prompt({
-              type: 'list',
-              name: 'promptFormat',
-              message: 'Format?',
-              choices: [
-                { name: 'Inpage', value: 'INPAGE' },
-                { name: 'Expanding', value: 'EXPANDING' },
-              ]
-            });
+          const { promptWidth } = await inquirer.prompt({
+            type: 'input',
+            name: 'promptWidth',
+            message: 'Width?'
+          });
 
-            const { promptWidth } = await inquirer.prompt({
-              type: 'input',
-              name: 'promptWidth',
-              message: 'Width?'
-            });
+          const { promptHeight } = await inquirer.prompt({
+            type: 'input',
+            name: 'promptHeight',
+            message: 'Height?'
+          });
 
-            const { promptHeight } = await inquirer.prompt({
-              type: 'input',
-              name: 'promptHeight',
-              message: 'Height?'
-            });
+          const createCreativeResult = await dc.createCreative(data.campaign, {
+            name: promptName,
+            width: promptWidth,
+            height: promptHeight,
+            format: promptFormat
+          });
 
-            creative = await dc.createCreative(data.advertiser, data.campaign, {
-              name: promptName,
-              width: promptWidth,
-              height: promptHeight,
-              format: promptFormat
-            });
+          creative = createCreativeResult.data;
 
-            // console.log('creative created.');
-          }
-
-          creative.format = 'INPAGE'; //need to sort this out
-          creative.filename = filename;
-          creative.path = filename;
-          
-          data.creatives.push(creative)
+          // console.log('creative created.');
         }
 
-        else {
-          // console.log('Found a match in local henkrc.')
-          creative = data.creatives[theIndex]
+        if (searchResult.length > 1) { // multiple creatives found
+          console.log('multiple creatives found, please select one')
+          //return
         }
 
-        console.log('Creative ' + creative.name + ' - selected. Proceeding to upload.');
-
-
-        //console.log('Uploading creative.')
-        
-        const upload = await dc.uploadCreative(data.advertiser, data.campaign, creative, data.inputDir);
-
-        if (upload.data.sessionStatus) {
-          // all good
-          console.log('Creative ' + creative.name + ' - upload complete.');
+        if (searchResult.length === 1) {
+          [ creative ] = searchResult;
         }
 
-        else {
-          if (upload.data.errorMessage) {
-            console.log('Creative ' + creative.name + ' - Error uploading file: ' + upload.data.errorMessage.reason);
-            console.log('Creative ' + creative.name + ' - Cancelling upload. Please check henkrc file for bad/old data or remove it and start over.');
-          }
-        }
+        creative.filename = filename;
+        creative.path = data.inputDir + '/' + filename;
+
+        data.creatives.push(creative)
       }
 
       else {
-        
+        // console.log('Found a match in local henkrc.')
+        creative = data.creatives[theIndex]
       }
+
+      console.log('Creative ' + creative.name + ' - selected. Proceeding to upload.');
+      const uploadResult = await dc.uploadCreative(creative)
+      console.log('Creative ' + creative.name + ' - upload complete.');
     }
-    
-    
-    console.log('Fetching preview url...');
-    //spinner.start();
-    const previewUrl = await dc.getPreviewUrl(data.advertiser, data.campaign);
 
-    //spinner.stop();
+    const previewUrl = await dc.getPreviewUrl(data.campaign);
+    console.log(previewUrl.data[0].previewUrl)
 
-    console.log(previewUrl)
-    
-    await dc.close();
-
-    //write the new data object to the henkrc file
-    let rcData = await fs.readJson(Filenames.RC); //read current data from file
-    const overwriteIndex = rcData.uploadConfigs.findIndex(config => config.type === data.type); //figure our which object in the array to overwrite
-    rcData.uploadConfigs[overwriteIndex] = data; //overwrite correct obj
-
-    await fs.writeJson(Filenames.RC, rcData, {
-      spaces: 2
-    }); //write to file
+    await writeToHenkrc(data);
   },
 };
+
+async function writeToHenkrc(data) {
+  //write the new data object to the henkrc file
+  let rcData = await fs.readJson(Filenames.RC); //read current data from file
+  const overwriteIndex = rcData.uploadConfigs.findIndex(config => config.type === data.type); //figure our which object in the array to overwrite
+  rcData.uploadConfigs[overwriteIndex] = data; //overwrite correct obj
+
+  await fs.writeJson(Filenames.RC, rcData, {
+    spaces: 2
+  }); //write to file
+}
