@@ -68,7 +68,9 @@ module.exports = async (data = {}, cli) => {
     else { // henkrc exists but not in correct new structure
       if (rc.hasOwnProperty('type')) { // looks like the object follows old structure
         data = {
-          uploadConfigs: [ ...rc ]
+          uploadConfigs: [
+            rc
+          ]
         }
       }
 
