@@ -7,6 +7,7 @@ const Filenames = require('../data/Filenames');
 const fs = require('fs-extra');
 const path = require('path');
 const Spinner = require('cli-spinner').Spinner;
+const chalk = require('chalk')
 
 module.exports = {
 
@@ -142,69 +143,63 @@ module.exports = {
     const zipFiles = files.filter(filename => filename.substr(filename.length-4, filename.length) === '.zip');
 
     for (const filename of zipFiles) {
-      const creativeName = filename.substr(0, filename.indexOf('.html'))
-      //let creativeSearchResult;
+      let creativeName = filename.substr(0, filename.indexOf('.zip')) // creative name is the filename without the .zip
+      if (filename.indexOf('.html')) creativeName = creativeName.substr(0, creativeName.indexOf('.html')); // remove the .html part from the name if it's also there
 
-      console.log('Creative ' + creativeName + ' - seeing if already stored in local henkrc file..')
+      console.log('Filename ' + filename + ' - seeing if already stored in local henkrc file..')
       const theIndex = data.creatives.findIndex(creative => creative.filename === filename);
 
       if (theIndex === -1) {
-        console.log('Creative ' + creativeName + ' - not in henkrc file, seeing if exists in Studio..')
+        console.log('Filename ' + filename + ' - not in henkrc file, seeing if exists in Studio..')
 
         let searchResult = await dc.getCreative(data.campaign, creativeName);
         searchResult = searchResult.data.records;
 
-        if (searchResult.length === 0) { // creative doesn't exist on studio yet
-          console.log('Creative ' + creativeName + ' - doesn\'t exist yet. Henk will create one for you.')
+        if (searchResult.length === 1) {
+          [searchResult] = searchResult;
 
-          const { promptName } = await inquirer.prompt({
-            type: 'input',
-            name: 'promptName',
-            message: 'Creative name?',
-            default: creativeName
-          });
+          if (searchResult.name.toLowerCase() === creativeName.toLowerCase()) {
+            creative = searchResult; //exact match found
+          }
 
-          const { promptFormat } = await inquirer.prompt({
-            type: 'list',
-            name: 'promptFormat',
-            message: 'Format?',
-            choices: [
-              { name: 'Inpage', value: 'INPAGE' },
-              { name: 'Expanding', value: 'EXPANDING' },
-            ]
-          });
+          else {
+            console.log('Creative ' + creativeName + ' - doesn\'t exist yet. Henk will create one for you.')
 
-          const { promptWidth } = await inquirer.prompt({
-            type: 'input',
-            name: 'promptWidth',
-            message: 'Width?'
-          });
+            // make new creative
+            const creativeData = await promptNewCreative(creativeName);
+            const createCreativeResult = await dc.createCreative(data.campaign, creativeData);
+            creative = createCreativeResult.data;
 
-          const { promptHeight } = await inquirer.prompt({
-            type: 'input',
-            name: 'promptHeight',
-            message: 'Height?'
-          });
-
-          const createCreativeResult = await dc.createCreative(data.campaign, {
-            name: promptName,
-            width: promptWidth,
-            height: promptHeight,
-            format: promptFormat
-          });
-
-          creative = createCreativeResult.data;
-
-          // console.log('creative created.');
+          }
         }
 
         if (searchResult.length > 1) { // multiple creatives found
-          console.log('multiple creatives found, please select one')
-          //return
+
+          const choices = searchResult.reduce(function(accumulator, currentValue) {
+              return [...accumulator, {
+                name: currentValue.name,
+                value: currentValue
+              }]
+          }, []);
+
+          const { creativeSelect } = await inquirer.prompt({
+            type: 'list',
+            name: 'creativeSelect',
+            message: 'Creative ' + creativeName + ' - multiple creatives found. please the correct one..',
+            choices: choices,
+          });
+
+          creative = creativeSelect;
+
         }
 
-        if (searchResult.length === 1) {
-          [ creative ] = searchResult;
+        if (searchResult.length === 0) { // creative doesn't exist on studio yet
+          console.log('Creative ' + creativeName + ' - doesn\'t exist yet. Henk will create one for you.')
+
+          // make new creative
+          const creativeData = await promptNewCreative(creativeName);
+          const createCreativeResult = await dc.createCreative(data.campaign, creativeData);
+          creative = createCreativeResult.data;
         }
 
         creative.filename = filename;
@@ -219,8 +214,22 @@ module.exports = {
       }
 
       console.log('Creative ' + creative.name + ' - selected. Proceeding to upload.');
-      const uploadResult = await dc.uploadCreative(creative)
-      console.log('Creative ' + creative.name + ' - upload complete.');
+
+      try {
+        const uploadResult = await dc.uploadCreative(creative)
+
+        if (uploadResult.data.length === 0) {
+          console.log(chalk.yellow('Creative ' + creative.name + ' - upload complete but with incompatible assets. Did you add the enabler?'));
+        }
+
+        else if (uploadResult.data.length > 0) {
+          console.log(chalk.green('Creative ' + creative.name + ' - upload complete.'));
+        }
+      }
+
+      catch (err) {
+        console.log(chalk.red('Creative ' + creative.name + ' - upload failed: ' + err.response.data[0].errorMessage))
+      }
     }
 
     const previewUrl = await dc.getPreviewUrl(data.campaign);
@@ -239,4 +248,43 @@ async function writeToHenkrc(data) {
   await fs.writeJson(Filenames.RC, rcData, {
     spaces: 2
   }); //write to file
+}
+
+async function promptNewCreative(creativeName) {
+
+  const { promptName } = await inquirer.prompt({
+    type: 'input',
+    name: 'promptName',
+    message: 'Creative name?',
+    default: creativeName
+  });
+
+  const { promptFormat } = await inquirer.prompt({
+    type: 'list',
+    name: 'promptFormat',
+    message: 'Format?',
+    choices: [
+      { name: 'Inpage', value: 'INPAGE' },
+      { name: 'Expanding', value: 'EXPANDING' },
+    ]
+  });
+
+  const { promptWidth } = await inquirer.prompt({
+    type: 'input',
+    name: 'promptWidth',
+    message: 'Width?'
+  });
+
+  const { promptHeight } = await inquirer.prompt({
+    type: 'input',
+    name: 'promptHeight',
+    message: 'Height?'
+  });
+
+  return {
+    name: promptName,
+    format: promptFormat,
+    width: promptWidth,
+    height: promptHeight
+  }
 }

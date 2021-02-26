@@ -171,9 +171,8 @@ module.exports = class Doubleclick {
         return await axios.post( this.dcUploadUrl, file.data, {
             headers,
             params,
-            //proxy
+            // proxy
         });
-
     }
 
     async getPreviewUrl(campaign) {

@@ -23,6 +23,7 @@
     "axios": "^0.21.1",
     "basic-ftp": "^3.4.4",
     "chai": "^4.2.0",
+    "chalk": "^4.1.0",
     "cli-spinner": "^0.2.10",
     "commander": "^2.19.0",
     "form-data": "^3.0.0",
