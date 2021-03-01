@@ -12,12 +12,10 @@ const getFileData = (filePath) => ({
 });
 
 const getCookieStr = (cookies) => {
-
     let cookieStr = '';
     for (let i = 0; i < cookies.length; i++) {
         cookieStr += cookies[i].name + '=' + cookies[i].value + '; '
     }
-
     return cookieStr;
 }
 
@@ -29,46 +27,20 @@ module.exports = class Doubleclick {
         this.cookies = options.cookies;
         this.dcUrl = 'https://www.google.com/doubleclick/studio/service';
         this.dcUploadUrl = 'https://www.google.com/doubleclick/studio/upload-http';
-        this.accountName = 'Mediamonks';
         this.accountId = '33345';
-        this.waitMs = 1000;
     }
 
     async login(options = {}) {
         const browser = await puppeteer.launch({
-            headless: false,
-            defaultViewport: {
-                width: 1440,
-                height: 700,
-            }
+            headless: false
         });
-
         const page = await browser.newPage();
-
-        const navigationPromise = page.waitForNavigation({
-            waitUntil: 'load',
-        });
-
         await page.goto('https://accounts.google.com/');
-        await navigationPromise;
-
-        // CHECK WHAT THE URL IS
-        // if (page.url().indexOf('https://myaccount.google.com/') === 0) {
-        //     log.debug('You are already logged in. You can now run \'npm run upload\'');
-        //     return browser.close();
-        // }
-
-        log.debug('Log into the Google account you use for DoubleClick.');
         await browser.waitForTarget((target) => target.url().indexOf('https://myaccount.google.com/') === 0, {
             timeout: 0,
         });
-
-        log.debug("Successfully logged in. You can now run 'npm run upload'");
-
         const client = await page.target().createCDPSession();
         const { cookies } = await client.send('Network.getAllCookies');
-
-        log.debug('Cookie saved, closing puppeteer');
         await browser.close();
 
         return cookies;

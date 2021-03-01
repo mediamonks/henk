@@ -9,6 +9,7 @@ const path = require('path');
 const Spinner = require('cli-spinner').Spinner;
 const chalk = require('chalk')
 
+
 module.exports = {
 
   questions: [
@@ -57,6 +58,7 @@ module.exports = {
     await writeToHenkrc(data);
     
     //logged in now presumably
+    
 
     // Find/create advertiser
     let advertiser;
@@ -68,9 +70,21 @@ module.exports = {
       advertisers = advertisers.data.records;
 
       if (advertisers.length > 1) {
-        console.log('Advertiser ' + data.advertiserName + ' - Multiple records found. Please choose one.')
-        // advertiser = ;
-        return;
+        const choices = advertisers.reduce(function(accumulator, currentValue) {
+          return [...accumulator, {
+            name: currentValue.name,
+            value: currentValue
+          }]
+        }, []);
+
+        const { advertiserSelect } = await inquirer.prompt({
+          type: 'list',
+          name: 'advertiserSelect',
+          message: 'Advertiser ' + data.advertiserName + ' - Multiple records found. Please choose one.',
+          choices: choices,
+        });
+
+        advertiser = advertiserSelect;
       }
 
       if (advertisers.length === 0) {
@@ -80,10 +94,13 @@ module.exports = {
           message: 'Advertiser ' + data.advertiserName + ' - doesn\'t exist yet. Should Henk create it now?'
         });
         if (!createNewAdvertiser) return ''
+
         console.log('Advertiser ' + data.advertiserName + ' - creating in Studio')
         const createAdvertiserRequest = await dc.createAdvertiser(data.advertiserName);
-        console.log('Advertiser ' + data.advertiserName + ' - created.')
+
+
         advertiser = createAdvertiserRequest.data;
+        console.log('Advertiser ' + advertiser.name + ' - created.')
       }
 
       if (advertisers.length === 1) {
@@ -93,7 +110,7 @@ module.exports = {
       data.advertiser = advertiser;
     }
 
-    console.log('Advertiser ' + data.advertiserName + ' - selected. ID: ' + data.advertiser.id)
+    console.log('Advertiser ' + data.advertiser.name + ' - selected. ID: ' + data.advertiser.id)
 
 
     // Find/create campaign
@@ -106,9 +123,21 @@ module.exports = {
       campaigns = campaigns.data.records;
 
       if (campaigns.length > 1) {
-        console.log('Campaign ' + data.campaignName + ' - Multiple records found. Please choose one.')
-        // campaigns = ;
-        return;
+        const choices = campaigns.reduce(function(accumulator, currentValue) {
+          return [...accumulator, {
+            name: currentValue.name,
+            value: currentValue
+          }]
+        }, []);
+
+        const { campaignSelect } = await inquirer.prompt({
+          type: 'list',
+          name: 'campaignSelect',
+          message: 'Campaign ' + data.campaignName + ' - Multiple records found. Please choose one.',
+          choices: choices,
+        });
+
+        campaign = campaignSelect;
       }
 
       if (campaigns.length === 0) {
@@ -120,8 +149,9 @@ module.exports = {
         if (!createNewCampaign) return ''
         console.log('Campaign ' + data.campaignName + ' - creating in Studio')
         const createCampaignRequest = await dc.createCampaign(data.advertiser, data.campaignName);
-        console.log('Campaign ' + data.campaignName + ' - created.')
+
         campaign = createCampaignRequest.data;
+        console.log('Campaign ' + data.campaignName + ' - created.')
       }
 
       if (campaigns.length === 1) {
@@ -131,8 +161,7 @@ module.exports = {
       data.campaign = campaign;
     }
 
-    console.log('Campaign ' + data.campaignName + ' - selected. ID: ' + data.campaign.id)
-
+    console.log('Campaign ' + data.campaign.name + ' - selected. ID: ' + data.campaign.id)
 
 
     // Find/Create creatives
