@@ -20,6 +20,7 @@
     "url": "git+https://github.com/mediamonks/henk.git"
   },
   "dependencies": {
+    "adform-upload-tool": "^1.0.0",
     "axios": "^0.21.1",
     "basic-ftp": "^3.4.4",
     "chai": "^4.2.0",
