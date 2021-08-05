@@ -73,9 +73,7 @@ module.exports = {
 
       let rcData = await fs.readJson(filepathRc);
       const overwriteIndex = rcData.uploadConfigs.findIndex(config => config.type === data.type);
-
       rcData.uploadConfigs[overwriteIndex] = data;
-
       await fs.writeJson(filepathRc, rcData);
     }
 
