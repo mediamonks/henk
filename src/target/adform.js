@@ -86,7 +86,7 @@ module.exports = {
     const zipFiles = files.filter(filename => filename.substr(filename.length-4, filename.length) === '.zip');
 
     for (const filename of zipFiles) {
-      console.log('uploading ' + filename)
+      // console.log('uploading ' + filename)
       const filePath = inputDir + '/' + filename;
       const title = filename.substr(0, filename.length-4);
 
@@ -97,7 +97,10 @@ module.exports = {
       const matches = campaignBanners.data.filter(creative => creative.name === title && !creative.deleted);
 
       if (matches.length > 0) { // update the matched creative's asset
-        console.log('updating existing asset')
+        // console.log('updating existing asset')
+
+        console.log(filename + "      : updating asset")
+
         const existingHtmlBanner = await adformApi.getHtmlBanner(matches[0].id.uuid);
         const existingAsset = existingHtmlBanner.data.Value.Asset.Uuid;
 
@@ -106,28 +109,33 @@ module.exports = {
           filePath: filePath
         })
 
-        console.log('updated asset')
-        console.log(updatedAsset.data)
+        // console.log('updated asset')
+        // console.log(updatedAsset.data)
 
       } else {
+
+        console.log(filename + "      : creating new asset")
+
         // Upload the asset first to the advertiser
         const htmlAsset = await adformApi.uploadHtmlAsset({
           advertiser: data.advertiserId,
           filePath: filePath,
         });
 
-        console.log('html asset uploaded with uuid ' + htmlAsset.data.Value.Uuid)
-        console.log('html asset uploaded with name ' + htmlAsset.data.Value.Title)
+        // console.log('html asset uploaded with uuid ' + htmlAsset.data.Value.Uuid)
+        // console.log('html asset uploaded with name ' + htmlAsset.data.Value.Title)
 
         // Then create a new HTML unit in the campaign and assign the asset to it
+        console.log(filename + "      : assigning asset to new html banner")
+
         const htmlBanner = await adformApi.createHtmlBanner({
           campaignId: data.campaignId,
           asset: htmlAsset.data,
           clickTagUrl: 'https://www.adform.com', // somehow it doesn't grab this automatically from the manifest.json.
         })
 
-        console.log('html banner created with uuid ' + htmlBanner.data.Value.Uuid)
-        console.log('html banner created with title ' + htmlBanner.data.Value.Title)
+        // console.log('html banner created with uuid ' + htmlBanner.data.Value.Uuid)
+        // console.log('html banner created with title ' + htmlBanner.data.Value.Title)
       }
     }
 
