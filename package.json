@@ -1,6 +1,6 @@
 {
   "name": "@mediamonks/henk",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Uploading files from one location to the other.",
   "main": "./src/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "url": "git+https://github.com/mediamonks/henk.git"
   },
   "dependencies": {
-    "adform-upload-tool": "^1.0.0",
+    "adform-upload-tool": "^1.0.3",
     "axios": "^0.21.1",
     "basic-ftp": "^3.4.4",
     "chai": "^4.2.0",
