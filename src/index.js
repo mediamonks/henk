@@ -91,6 +91,7 @@ module.exports = async (data = {}, cli) => {
 
   const choices = [
     { name: 'Mediamonks Preview', value: 'mm-preview' },
+    { name: 'Adform', value: 'adform' },
     { name: 'Workspace', value: 'workspace' },
     { name: 'Flashtalking', value: 'flashtalking' },
     { name: 'Google DoubleClick Studio', value: 'doubleclick'},
