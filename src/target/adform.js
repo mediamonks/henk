@@ -58,7 +58,7 @@ module.exports = {
 
     if (!data.campaignId) {
       const campaigns = await adformApi.getCampaigns();
-      const campaignsByClient = campaigns.data.filter( (campaign) => campaign.advertiserId === targetAdvertiser.type);
+      const campaignsByClient = campaigns.data.filter( (campaign) => campaign.advertiserId === data.advertiserId);
 
       const targetCampaign = await inquirer.prompt({
         type: 'list',
